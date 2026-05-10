@@ -601,15 +601,7 @@
       status: 'Active'
     };
 
-    // ── REPLACE THIS URL WITH YOUR GOOGLE APPS SCRIPT WEB APP URL ──
-    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhKSBIkqoxmuVYlCN5-rSyJ3CKmYhJn2pnSD1_3KDr__sAQUBGDxvzCoPwp-g4hPYFzw/exec';
-
-
-    if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbxhKSBIkqoxmuVYlCN5-rSyJ3CKmYhJn2pnSD1_3KDr__sAQUBGDxvzCoPwp-g4hPYFzw/exec') {
-      // Demo mode — show success without actually posting
-      showSuccess(data);
-      return;
-    }
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxhKSBIkqoxmuVYlCN5-rSyJ3CKmYhJn2pnSD1_3KDr__sAQUBGDxvzCoPwp-g4hPYFzw/exec';
 
     fetch(SCRIPT_URL, {
       method: 'POST',
