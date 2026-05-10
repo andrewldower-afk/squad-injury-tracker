@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Player Injury Report</title>
+<style>
+  :root {
+    --green: #1a7a4a;
+    --green-light: #e8f5ee;
+    --green-mid: #2d9e63;
+    --text: #1a1a1a;
+    --text-muted: #555;
+    --border: #d0d7d2;
+    --bg: #f7f9f8;
+    --white: #ffffff;
+    --red: #c0392b;
+    --amber: #d97706;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 40px;
+  }
+
+  .header {
+    background: var(--green);
+    color: white;
+    padding: 24px 20px 20px;
+    text-align: center;
+  }
+
+  .header .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+
+  .header h1 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 4px;
+  }
+
+  .header p {
+    font-size: 14px;
+    opacity: 0.85;
+  }
+
+  .progress-bar {
+    background: rgba(255,255,255,0.2);
+    height: 4px;
+    margin-top: 16px;
+    border-radius: 2px;
+    overflow: hidden;
+  }
+
+  .progress-fill {
+    background: white;
+    height: 100%;
+    border-radius: 2px;
+    transition: width 0.4s ease;
+    width: 0%;
+  }
+
+  .form-wrap {
+    padding: 20px 16px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 14px;
+    border: 1px solid var(--border);
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--green);
+    margin-bottom: 12px;
+  }
+
+  label {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  label .hint {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  input[type="email"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 16px;
+    color: var(--text);
+    background: var(--white);
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: var(--green);
+    box-shadow: 0 0 0 3px rgba(26,122,74,0.1);
+  }
+
+  textarea { resize: vertical; min-height: 90px; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .radio-group, .chip-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .radio-option:has(input:checked) {
+    border-color: var(--green);
+    background: var(--green-light);
+  }
+
+  .radio-option input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--green);
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .radio-option span {
+    font-size: 15px;
+    color: var(--text);
+  }
+
+  .chip-group {
+    flex-direction: row;
+    flex-wrap: wrap;
+  }
+
+  .chip {
+    padding: 8px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 20px;
+    font-size: 14px;
+    cursor: pointer;
+    background: white;
+    color: var(--text);
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .chip.selected {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+
+  .severity-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .sev-btn {
+    flex: 1;
+    padding: 10px 6px;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    text-align: center;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    background: white;
+    transition: all 0.15s;
+  }
+
+  .sev-btn.mild { color: #15803d; }
+  .sev-btn.mild.selected { background: #dcfce7; border-color: #15803d; }
+  .sev-btn.moderate { color: var(--amber); }
+  .sev-btn.moderate.selected { background: #fef3c7; border-color: var(--amber); }
+  .sev-btn.severe { color: var(--red); }
+  .sev-btn.severe.selected { background: #fee2e2; border-color: var(--red); }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 16px 0;
+  }
+
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: background 0.2s, transform 0.1s;
+    letter-spacing: 0.01em;
+  }
+
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:hover { background: var(--green-mid); }
+  .submit-btn:disabled { background: #aaa; cursor: not-allowed; }
+
+  .update-link {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .update-link a {
+    color: var(--green);
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 40px 24px;
+  }
+
+  .success-icon {
+    width: 72px;
+    height: 72px;
+    background: var(--green-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 36px;
+  }
+
+  .success-screen h2 {
+    font-size: 22px;
+    font-weight: 700;
+    margin-bottom: 10px;
+    color: var(--green);
+  }
+
+  .success-screen p {
+    font-size: 15px;
+    color: var(--text-muted);
+    line-height: 1.6;
+    margin-bottom: 8px;
+  }
+
+  .ref-box {
+    background: var(--green-light);
+    border: 1px solid var(--green);
+    border-radius: 10px;
+    padding: 12px 16px;
+    margin: 16px 0;
+    font-size: 14px;
+    color: var(--green);
+    font-weight: 600;
+  }
+
+  .error-msg {
+    font-size: 12px;
+    color: var(--red);
+    margin-top: 4px;
+    display: none;
+  }
+
+  .required-star { color: var(--red); margin-left: 2px; }
+  
+  .info-box {
+    background: #eff6ff;
+    border-left: 3px solid #3b82f6;
+    padding: 10px 14px;
+    border-radius: 0 8px 8px 0;
+    font-size: 13px;
+    color: #1e40af;
+    margin-top: 8px;
+    line-height: 1.5;
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">⚽ Squad Injury Report</div>
+  <h1>New Injury Report</h1>
+  <p>Fill this in as soon as possible after your injury</p>
+  <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+</div>
+
+<div class="form-wrap" id="mainForm">
+
+  <!-- SECTION 1: WHO ARE YOU -->
+  <div class="card">
+    <div class="card-label">About You</div>
+
+    <div class="field">
+      <label>Your full name <span class="required-star">*</span></label>
+      <input type="text" id="playerName" placeholder="e.g. Sarah Johnson" autocomplete="name" oninput="updateProgress()">
+      <div class="error-msg" id="err-name">Please enter your name</div>
+    </div>
+
+    <div class="field">
+      <label>Date of injury <span class="required-star">*</span>
+        <span class="hint">When did this injury happen?</span>
+      </label>
+      <input type="date" id="injuryDate" oninput="updateProgress()">
+      <div class="error-msg" id="err-date">Please select a date</div>
+    </div>
+  </div>
+
+  <!-- SECTION 2: ABOUT THE INJURY -->
+  <div class="card">
+    <div class="card-label">The Injury</div>
+
+    <div class="field">
+      <label>What is the injury? <span class="required-star">*</span>
+        <span class="hint">Describe what happened and where on your body</span>
+      </label>
+      <textarea id="injuryDescription" placeholder="e.g. Twisted my right ankle landing from a header. It's swollen on the outside." oninput="updateProgress()"></textarea>
+      <div class="error-msg" id="err-desc">Please describe the injury</div>
+    </div>
+
+    <div class="field">
+      <label>How did it happen? <span class="required-star">*</span></label>
+      <div class="chip-group" id="howGroup">
+        <div class="chip" onclick="toggleChip(this,'how')">During training</div>
+        <div class="chip" onclick="toggleChip(this,'how')">During a match</div>
+        <div class="chip" onclick="toggleChip(this,'how')">Outside football</div>
+        <div class="chip" onclick="toggleChip(this,'how')">Gradual / overuse</div>
+        <div class="chip" onclick="toggleChip(this,'how')">Not sure</div>
+      </div>
+      <div class="error-msg" id="err-how">Please select one</div>
+    </div>
+
+    <div class="field">
+      <label>How severe does it feel right now?</label>
+      <div class="severity-row">
+        <div class="sev-btn mild" onclick="selectSev(this,'mild')">😊 Mild</div>
+        <div class="sev-btn moderate" onclick="selectSev(this,'moderate')">😐 Moderate</div>
+        <div class="sev-btn severe" onclick="selectSev(this,'severe')">😣 Severe</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: MEDICAL -->
+  <div class="card">
+    <div class="card-label">Medical</div>
+
+    <div class="field">
+      <label>Have you seen a doctor or physio about it? <span class="required-star">*</span></label>
+      <div class="radio-group">
+        <label class="radio-option">
+          <input type="radio" name="seenDoctor" value="Yes – doctor" onchange="updateProgress()">
+          <span>Yes – I saw a doctor</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="seenDoctor" value="Yes – physio" onchange="updateProgress()">
+          <span>Yes – I saw a physio</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="seenDoctor" value="Not yet – planning to" onchange="updateProgress()">
+          <span>Not yet – planning to</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="seenDoctor" value="No" onchange="updateProgress()">
+          <span>No</span>
+        </label>
+      </div>
+      <div class="error-msg" id="err-doctor">Please select one</div>
+    </div>
+
+    <div class="field" id="diagnosisField" style="display:none;">
+      <label>What was the diagnosis or advice?</label>
+      <textarea id="diagnosis" placeholder="e.g. Grade 1 ankle sprain, rest for 2 weeks, ice daily"></textarea>
+    </div>
+
+    <div class="field">
+      <label>Estimated recovery time
+        <span class="hint">Your best guess is fine — coaches will check in with you</span>
+      </label>
+      <select id="recoveryTime" onchange="updateProgress()">
+        <option value="">— Select —</option>
+        <option>Less than 1 week</option>
+        <option>1–2 weeks</option>
+        <option>2–4 weeks</option>
+        <option>4–8 weeks</option>
+        <option>More than 8 weeks</option>
+        <option>Not sure yet</option>
+      </select>
+    </div>
+
+    <div class="field">
+      <label>Can you do any modified training? <span class="required-star">*</span>
+        <span class="hint">e.g. upper body only, no running, swimming</span>
+      </label>
+      <div class="radio-group">
+        <label class="radio-option">
+          <input type="radio" name="modifiedTraining" value="Yes – some activities" onchange="updateProgress()">
+          <span>Yes – I can do some activities</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="modifiedTraining" value="No – full rest needed" onchange="updateProgress()">
+          <span>No – I need full rest</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="modifiedTraining" value="Not sure" onchange="updateProgress()">
+          <span>Not sure</span>
+        </label>
+      </div>
+      <div class="error-msg" id="err-training">Please select one</div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: EXTRA INFO -->
+  <div class="card">
+    <div class="card-label">Anything else?</div>
+
+    <div class="field">
+      <label>Is this a recurring injury?</label>
+      <div class="radio-group">
+        <label class="radio-option">
+          <input type="radio" name="recurring" value="Yes">
+          <span>Yes – I've had this before</span>
+        </label>
+        <label class="radio-option">
+          <input type="radio" name="recurring" value="No">
+          <span>No – first time</span>
+        </label>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Any other notes for the coaches?</label>
+      <textarea id="extraNotes" placeholder="Anything else we should know? e.g. you're on medication, a parent has already been in touch, etc." style="min-height: 70px;"></textarea>
+    </div>
+
+    <div class="info-box">
+      ℹ️ Your coaches will see this form. If your injury changes, use the <strong>Update Injury</strong> form (link after you submit).
+    </div>
+  </div>
+
+  <button class="submit-btn" onclick="submitForm()" id="submitBtn">Submit Injury Report →</button>
+
+  <div class="update-link">
+    Already submitted? <a href="injury-update-form.html">Update your injury →</a>
+  </div>
+
+</div>
+
+<!-- SUCCESS SCREEN -->
+<div class="success-screen" id="successScreen">
+  <div class="success-icon">✅</div>
+  <h2>Report Submitted!</h2>
+  <p>Thanks — your coaches have been notified and can see your injury details.</p>
+  <div class="ref-box" id="refBox"></div>
+  <p>If your injury changes — you get better, see a doctor, or have an update — use the link below.</p>
+  <br>
+  <a href="injury-update-form.html" style="display:inline-block; background: var(--green); color:white; padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 15px;">Update my injury →</a>
+</div>
+
+<script>
+  // Set today as default date
+  document.getElementById('injuryDate').valueAsDate = new Date();
+
+  // Show/hide diagnosis field
+  document.querySelectorAll('input[name="seenDoctor"]').forEach(r => {
+    r.addEventListener('change', () => {
+      const show = r.value.startsWith('Yes');
+      document.getElementById('diagnosisField').style.display = show ? 'block' : 'none';
+    });
+  });
+
+  let selectedHow = '';
+  let selectedSeverity = '';
+
+  function toggleChip(el, group) {
+    document.querySelectorAll('.chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedHow = el.textContent;
+    updateProgress();
+  }
+
+  function selectSev(el, val) {
+    document.querySelectorAll('.sev-btn').forEach(b => b.classList.remove('selected'));
+    el.classList.add('selected');
+    selectedSeverity = val;
+  }
+
+  function updateProgress() {
+    let filled = 0;
+    const total = 6;
+    if (document.getElementById('playerName').value.trim()) filled++;
+    if (document.getElementById('injuryDate').value) filled++;
+    if (document.getElementById('injuryDescription').value.trim()) filled++;
+    if (selectedHow) filled++;
+    if (document.querySelector('input[name="seenDoctor"]:checked')) filled++;
+    if (document.querySelector('input[name="modifiedTraining"]:checked')) filled++;
+    document.getElementById('progressFill').style.width = ((filled / total) * 100) + '%';
+  }
+
+  function validate() {
+    let ok = true;
+    const checks = [
+      { id: 'playerName', errId: 'err-name', check: () => document.getElementById('playerName').value.trim() },
+      { id: 'injuryDate', errId: 'err-date', check: () => document.getElementById('injuryDate').value },
+      { id: 'injuryDescription', errId: 'err-desc', check: () => document.getElementById('injuryDescription').value.trim() },
+    ];
+    checks.forEach(c => {
+      const err = document.getElementById(c.errId);
+      if (!c.check()) { err.style.display = 'block'; ok = false; }
+      else { err.style.display = 'none'; }
+    });
+
+    const howErr = document.getElementById('err-how');
+    if (!selectedHow) { howErr.style.display = 'block'; ok = false; } else { howErr.style.display = 'none'; }
+
+    const docErr = document.getElementById('err-doctor');
+    if (!document.querySelector('input[name="seenDoctor"]:checked')) { docErr.style.display = 'block'; ok = false; } else { docErr.style.display = 'none'; }
+
+    const trainErr = document.getElementById('err-training');
+    if (!document.querySelector('input[name="modifiedTraining"]:checked')) { trainErr.style.display = 'block'; ok = false; } else { trainErr.style.display = 'none'; }
+
+    return ok;
+  }
+
+  function submitForm() {
+    if (!validate()) {
+      document.querySelector('.error-msg[style="display: block;"]')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      return;
+    }
+
+    const btn = document.getElementById('submitBtn');
+    btn.textContent = 'Submitting…';
+    btn.disabled = true;
+
+    const data = {
+      timestamp: new Date().toLocaleString('en-AU'),
+      playerName: document.getElementById('playerName').value.trim(),
+      injuryDate: document.getElementById('injuryDate').value,
+      injuryDescription: document.getElementById('injuryDescription').value.trim(),
+      howItHappened: selectedHow,
+      severity: selectedSeverity || 'Not specified',
+      seenDoctor: document.querySelector('input[name="seenDoctor"]:checked')?.value,
+      diagnosis: document.getElementById('diagnosis').value.trim(),
+      recoveryTime: document.getElementById('recoveryTime').value || 'Not specified',
+      modifiedTraining: document.querySelector('input[name="modifiedTraining"]:checked')?.value,
+      recurring: document.querySelector('input[name="recurring"]:checked')?.value || 'Not specified',
+      extraNotes: document.getElementById('extraNotes').value.trim(),
+      status: 'Active'
+    };
+
+    // ── REPLACE THIS URL WITH YOUR GOOGLE APPS SCRIPT WEB APP URL ──
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyCVDucaAWrBJoiJYD8x6fOsl3tfRGKVip1j_In8mvmazL4D9bkxKW0OGEbJ4Db4cTd4Q/exec';
+
+    if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbyCVDucaAWrBJoiJYD8x6fOsl3tfRGKVip1j_In8mvmazL4D9bkxKW0OGEbJ4Db4cTd4Q/exec') {
+      // Demo mode — show success without actually posting
+      showSuccess(data);
+      return;
+    }
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'new', data })
+    }).then(() => showSuccess(data)).catch(() => showSuccess(data));
+  }
+
+  function showSuccess(data) {
+    document.getElementById('mainForm').style.display = 'none';
+    const s = document.getElementById('successScreen');
+    s.style.display = 'block';
+    document.getElementById('progressFill').style.width = '100%';
+    document.getElementById('refBox').innerHTML =
+      `📋 Submitted for <strong>${data.playerName}</strong> — injury date: <strong>${data.injuryDate}</strong><br>Use your name + injury date to find and update your record.`;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>

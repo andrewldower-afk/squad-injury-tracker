@@ -1,0 +1,513 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Update Injury Report</title>
+<style>
+  :root {
+    --green: #1a7a4a;
+    --green-light: #e8f5ee;
+    --green-mid: #2d9e63;
+    --text: #1a1a1a;
+    --text-muted: #555;
+    --border: #d0d7d2;
+    --bg: #f7f9f8;
+    --white: #ffffff;
+    --red: #c0392b;
+    --amber: #d97706;
+    --blue: #1d4ed8;
+    --blue-light: #eff6ff;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    padding: 0 0 40px;
+  }
+
+  .header {
+    background: #1d4ed8;
+    color: white;
+    padding: 24px 20px 20px;
+    text-align: center;
+  }
+
+  .header .badge {
+    display: inline-block;
+    background: rgba(255,255,255,0.2);
+    color: white;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 20px;
+    margin-bottom: 10px;
+  }
+
+  .header h1 { font-size: 22px; font-weight: 700; margin-bottom: 4px; }
+  .header p { font-size: 14px; opacity: 0.85; }
+
+  .form-wrap {
+    padding: 20px 16px;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  .card {
+    background: var(--white);
+    border-radius: 14px;
+    padding: 20px;
+    margin-bottom: 14px;
+    border: 1px solid var(--border);
+  }
+
+  .card-label {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: #1d4ed8;
+    margin-bottom: 12px;
+  }
+
+  label {
+    display: block;
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text);
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  label .hint {
+    display: block;
+    font-size: 12px;
+    font-weight: 400;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  input[type="text"],
+  input[type="date"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    font-size: 16px;
+    color: var(--text);
+    background: var(--white);
+    appearance: none;
+    -webkit-appearance: none;
+    transition: border-color 0.2s;
+    font-family: inherit;
+  }
+
+  input:focus, select:focus, textarea:focus {
+    outline: none;
+    border-color: #1d4ed8;
+    box-shadow: 0 0 0 3px rgba(29,78,216,0.1);
+  }
+
+  textarea { resize: vertical; min-height: 90px; }
+
+  .field { margin-bottom: 16px; }
+  .field:last-child { margin-bottom: 0; }
+
+  .radio-group { display: flex; flex-direction: column; gap: 8px; }
+
+  .radio-option {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .radio-option:has(input:checked) {
+    border-color: #1d4ed8;
+    background: var(--blue-light);
+  }
+
+  .radio-option input[type="radio"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #1d4ed8;
+    flex-shrink: 0;
+    cursor: pointer;
+  }
+
+  .radio-option span { font-size: 15px; color: var(--text); }
+
+  .lookup-btn {
+    width: 100%;
+    padding: 14px;
+    background: #1d4ed8;
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 16px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .lookup-btn:active { transform: scale(0.98); }
+  .lookup-btn:hover { background: #1e40af; }
+
+  .submit-btn {
+    width: 100%;
+    padding: 16px;
+    background: var(--green);
+    color: white;
+    border: none;
+    border-radius: 12px;
+    font-size: 17px;
+    font-weight: 700;
+    cursor: pointer;
+    margin-top: 4px;
+    transition: background 0.2s, transform 0.1s;
+  }
+
+  .submit-btn:active { transform: scale(0.98); }
+  .submit-btn:hover { background: var(--green-mid); }
+
+  .record-found {
+    background: var(--green-light);
+    border: 1.5px solid var(--green);
+    border-radius: 12px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+
+  .record-found .rf-label {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    color: var(--green);
+    margin-bottom: 6px;
+  }
+
+  .record-found p { font-size: 14px; color: #1a3d2b; line-height: 1.5; }
+
+  .not-found {
+    background: #fee2e2;
+    border: 1.5px solid var(--red);
+    border-radius: 12px;
+    padding: 14px 16px;
+    color: var(--red);
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+
+  #updateSection { display: none; }
+
+  .success-screen {
+    display: none;
+    text-align: center;
+    padding: 40px 24px;
+  }
+
+  .success-icon {
+    width: 72px;
+    height: 72px;
+    background: var(--green-light);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 20px;
+    font-size: 36px;
+  }
+
+  .success-screen h2 { font-size: 22px; font-weight: 700; margin-bottom: 10px; color: var(--green); }
+  .success-screen p { font-size: 15px; color: var(--text-muted); line-height: 1.6; }
+
+  .back-link {
+    text-align: center;
+    margin-top: 16px;
+    font-size: 14px;
+    color: var(--text-muted);
+  }
+
+  .back-link a { color: #1d4ed8; font-weight: 600; text-decoration: none; }
+
+  .error-msg {
+    font-size: 12px;
+    color: var(--red);
+    margin-top: 4px;
+    display: none;
+  }
+
+  .required-star { color: var(--red); margin-left: 2px; }
+
+  .status-chip {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    font-weight: 600;
+    margin-left: 6px;
+  }
+
+  .status-active { background: #fee2e2; color: var(--red); }
+  .status-improving { background: #fef3c7; color: var(--amber); }
+  .status-cleared { background: #dcfce7; color: #15803d; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">🔄 Update Report</div>
+  <h1>Update Your Injury</h1>
+  <p>Find your original report and add new information</p>
+</div>
+
+<div class="form-wrap" id="mainArea">
+
+  <!-- STEP 1: LOOKUP -->
+  <div class="card" id="lookupCard">
+    <div class="card-label">Find your record</div>
+
+    <div class="field">
+      <label>Your name <span class="required-star">*</span></label>
+      <input type="text" id="lookupName" placeholder="Enter your name exactly as submitted" autocomplete="name">
+      <div class="error-msg" id="err-lookup-name">Please enter your name</div>
+    </div>
+
+    <div class="field">
+      <label>Original injury date <span class="required-star">*</span>
+        <span class="hint">The date you entered on your first form</span>
+      </label>
+      <input type="date" id="lookupDate">
+      <div class="error-msg" id="err-lookup-date">Please select the date</div>
+    </div>
+
+    <button class="lookup-btn" onclick="lookupRecord()">Find my record →</button>
+  </div>
+
+  <div id="lookupResult"></div>
+
+  <!-- STEP 2: UPDATE SECTION (shown after lookup) -->
+  <div id="updateSection">
+
+    <div class="card">
+      <div class="card-label">What's changed?</div>
+
+      <div class="field">
+        <label>Current injury status <span class="required-star">*</span></label>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="currentStatus" value="Still injured – no change">
+            <span>Still injured – no real change</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="currentStatus" value="Improving">
+            <span>Improving 🙂</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="currentStatus" value="Getting worse">
+            <span>Getting worse 😟</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="currentStatus" value="Fully recovered – ready to play">
+            <span>Fully recovered – ready to play! 🎉</span>
+          </label>
+        </div>
+        <div class="error-msg" id="err-status">Please select your current status</div>
+      </div>
+
+      <div class="field">
+        <label>Have you now seen a doctor or physio?</label>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="newMedical" value="Yes – doctor">
+            <span>Yes – I saw a doctor</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="newMedical" value="Yes – physio">
+            <span>Yes – I saw a physio</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="newMedical" value="Still planning to">
+            <span>Still planning to</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="newMedical" value="No update">
+            <span>No update on this</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>Updated recovery time estimate</label>
+        <select id="newRecovery">
+          <option value="">— No change / not sure —</option>
+          <option>Less than 1 week</option>
+          <option>1–2 weeks</option>
+          <option>2–4 weeks</option>
+          <option>4–8 weeks</option>
+          <option>More than 8 weeks</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>Any new information or update for coaches?
+          <span class="hint">Diagnosis, physio advice, how you're feeling, etc.</span>
+        </label>
+        <textarea id="updateNotes" placeholder="e.g. Saw the physio today — grade 2 strain, 4 weeks minimum. Starting pool sessions next week."></textarea>
+      </div>
+
+      <div class="field">
+        <label>Can you train now?</label>
+        <div class="radio-group">
+          <label class="radio-option">
+            <input type="radio" name="canTrain" value="Yes – full training">
+            <span>Yes – full training</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="canTrain" value="Yes – modified only">
+            <span>Yes – modified / light only</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="canTrain" value="No – still resting">
+            <span>No – still resting</span>
+          </label>
+          <label class="radio-option">
+            <input type="radio" name="canTrain" value="No update">
+            <span>No change</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <button class="submit-btn" onclick="submitUpdate()">Submit Update →</button>
+
+    <div class="back-link" style="margin-top:12px;">
+      <a href="injury-report-form.html">← New injury? Submit a new report</a>
+    </div>
+  </div>
+
+</div>
+
+<!-- SUCCESS SCREEN -->
+<div class="success-screen" id="successScreen">
+  <div class="success-icon">✅</div>
+  <h2>Update Submitted!</h2>
+  <p>Your coaches can now see the latest information about your injury.</p>
+  <br>
+  <p style="font-size:13px; color: var(--text-muted);">Need to update again? Come back anytime.</p>
+  <br>
+  <a href="injury-update-form.html" style="display:inline-block; background: #1d4ed8; color:white; padding: 14px 28px; border-radius: 12px; font-weight: 700; text-decoration: none; font-size: 15px;">Update again →</a>
+</div>
+
+<script>
+  // ── REPLACE WITH YOUR GOOGLE APPS SCRIPT URL ──
+  const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyCVDucaAWrBJoiJYD8x6fOsl3tfRGKVip1j_In8mvmazL4D9bkxKW0OGEbJ4Db4cTd4Q/exec';
+
+  function lookupRecord() {
+    const name = document.getElementById('lookupName').value.trim();
+    const date = document.getElementById('lookupDate').value;
+    let ok = true;
+
+    const nameErr = document.getElementById('err-lookup-name');
+    if (!name) { nameErr.style.display = 'block'; ok = false; } else { nameErr.style.display = 'none'; }
+
+    const dateErr = document.getElementById('err-lookup-date');
+    if (!date) { dateErr.style.display = 'block'; ok = false; } else { dateErr.style.display = 'none'; }
+
+    if (!ok) return;
+
+    const resultDiv = document.getElementById('lookupResult');
+
+    if (SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbyCVDucaAWrBJoiJYD8x6fOsl3tfRGKVip1j_In8mvmazL4D9bkxKW0OGEbJ4Db4cTd4Q/exec') {
+      // Demo mode
+      resultDiv.innerHTML = `
+        <div class="record-found">
+          <div class="rf-label">✅ Record found (demo mode)</div>
+          <p><strong>${name}</strong> — injury reported on <strong>${date}</strong><br>
+          This is a demo preview. Once connected to Google Sheets, it will pull your real record.</p>
+        </div>`;
+      document.getElementById('updateSection').style.display = 'block';
+      resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      return;
+    }
+
+    fetch(`${SCRIPT_URL}?action=lookup&name=${encodeURIComponent(name)}&date=${encodeURIComponent(date)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.found) {
+          resultDiv.innerHTML = `
+            <div class="record-found">
+              <div class="rf-label">✅ Record found</div>
+              <p><strong>${data.playerName}</strong> — injury reported on <strong>${data.injuryDate}</strong><br>
+              ${data.injuryDescription}<br>
+              Current status: <strong>${data.status || 'Active'}</strong></p>
+            </div>`;
+          document.getElementById('updateSection').style.display = 'block';
+        } else {
+          resultDiv.innerHTML = `
+            <div class="not-found">
+              ❌ No record found for <strong>${name}</strong> on <strong>${date}</strong>.<br>
+              Check the spelling of your name and the date you used when submitting.<br><br>
+              <a href="injury-report-form.html" style="color: var(--red); font-weight:600;">Submit a new report instead →</a>
+            </div>`;
+        }
+        resultDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      })
+      .catch(() => {
+        resultDiv.innerHTML = `<div class="not-found">⚠️ Could not connect. Please try again or speak to your coach.</div>`;
+      });
+  }
+
+  function submitUpdate() {
+    const status = document.querySelector('input[name="currentStatus"]:checked');
+    const statusErr = document.getElementById('err-status');
+    if (!status) { statusErr.style.display = 'block'; return; }
+    statusErr.style.display = 'none';
+
+    const updateData = {
+      action: 'update',
+      playerName: document.getElementById('lookupName').value.trim(),
+      injuryDate: document.getElementById('lookupDate').value,
+      updateTimestamp: new Date().toLocaleString('en-AU'),
+      currentStatus: status.value,
+      newMedical: document.querySelector('input[name="newMedical"]:checked')?.value || '',
+      newRecovery: document.getElementById('newRecovery').value,
+      updateNotes: document.getElementById('updateNotes').value.trim(),
+      canTrain: document.querySelector('input[name="canTrain"]:checked')?.value || ''
+    };
+
+    if (SCRIPT_URL === 'YOUR_GOOGLE_APPS_SCRIPT_URL_HERE') {
+      showSuccess();
+      return;
+    }
+
+    fetch(SCRIPT_URL, {
+      method: 'POST',
+      mode: 'no-cors',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updateData)
+    }).then(() => showSuccess()).catch(() => showSuccess());
+  }
+
+  function showSuccess() {
+    document.getElementById('mainArea').style.display = 'none';
+    document.getElementById('successScreen').style.display = 'block';
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+</script>
+</body>
+</html>
